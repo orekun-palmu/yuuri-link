@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ゆーり！ - Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #031217;
+    --bg-panel: #07222b;
+    --bg-panel-2: #0a313d;
+    --sky-blue: #70d6eb;
+    --sea-blue: #008094;
+    --sea-glow: #a4f0fd;
+    --text: #e8f8fa;
+    --text-dim: #8abac4;
+    --line: rgba(0, 128, 148, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(33, 178, 202, 0.25), transparent 60%),
+      radial-gradient(ellipse at 50% 110%, rgba(0, 128, 148, 0.20), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    line-height: 1.9;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ================= オープニング演出 (海辺→空→海中ダイブ→波紋＆光) ================= */
+  #intro-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: opacity 1.2s ease;
+  }
+  #intro-overlay.hide { opacity: 0; pointer-events: none; }
+
+  /* 視点移動ステージ（海辺→空→着水・海中） */
+  .stage-viewport {
+    position: absolute;
+    width: 100%;
+    height: 300%;
+    top: 0;
+    left: 0;
+    background: linear-gradient(
+      to bottom,
+      #133742 0%,    /* 海辺・夕暮れ/空の下層 */
+      #03101d 25%,   /* 上空・宇宙に近い青 */
+      #023440 60%,   /* 水面・浅瀬 */
+      #00242c 80%,   /* 海中 */
+      #000c12 100%
+    );
+    animation: cameraFly 4s cubic-bezier(0.45, 0, 0.15, 1) forwards;
+  }
+
+  @keyframes cameraFly {
+    0% { transform: translateY(-33.33%); }  /* 海辺スタート */
+    30% { transform: translateY(0%); }       /* 空へ大きく飛翔 */
+    65% { transform: translateY(-66.66%); }  /* 一気に海へダイブ */
+    100% { transform: translateY(-60%); }    /* 海中で静止 */
+  }
+
+  /* 水面着水時の水しぶき・波紋 */
+  .ripple-container {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .ripple {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 50px; height: 50px;
+    border: 3px solid var(--sky-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 30px var(--sea-glow), inset 0 0 30px var(--sea-glow);
+    opacity: 0;
+    animation: rippleBurst 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) 2.6s forwards;
+  }
+
+  .ripple:nth-child(2) {
+    animation-delay: 2.8s;
+  }
+
+  @keyframes rippleBurst {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(30); opacity: 0; }
+  }
+
+  /* 水中に差し込む光線 (Rays) */
+  .sun-rays {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200vw;
+    height: 100vh;
+    background: radial-gradient(ellipse at 50% 0%, rgba(164, 240, 253, 0.4) 0%, rgba(0, 128, 148, 0.15) 50%, transparent 80%);
+    opacity: 0;
+    mix-blend-mode: screen;
+    animation: raysGlow 2.5s ease-out 3.0s forwards;
+  }
+
+  @keyframes raysGlow {
+    0% { opacity: 0; transform: translateX(-50%) scaleY(0.5); }
+    100% { opacity: 0.9; transform: translateX(-50%) scaleY(1); }
+  }
+
+  /* 90度フリップテキスト演出 */
+  .cutin-container {
+    position: relative;
+    z-index: 10;
+    perspective: 1000px;
+    text-align: center;
+    padding: 0 20px;
+  }
+
+  .flip-card {
+    font-family: 'Shippori Mincho B1', serif;
+    font-weight: 800;
+    font-size: clamp(1.4rem, 5vw, 2.2rem);
+    color: #fff;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 15px var(--sea-glow), 0 0 30px var(--sea-blue);
+    transform-style: preserve-3d;
+    opacity: 0;
+    animation: textSequence 3.5s ease 2.2s forwards;
+  }
+
+  @keyframes textSequence {
+    0% { opacity: 0; transform: rotateX(-90deg); }
+    15% { opacity: 1; transform: rotateX(0deg); }      /* 「ポンコツは直りません」表示 */
+    45% { opacity: 1; transform: rotateX(0deg); }
+    55% { transform: rotateX(90deg); opacity: 0; }     /* 90度ひっくり返る */
+    65% { opacity: 0; transform: rotateX(-90deg); }
+    80% { opacity: 1; transform: rotateX(0deg); }      /* 「仕様だからです」切り替え */
+    100% { opacity: 1; transform: rotateX(0deg); }
+  }
+
+  .skip-btn {
+    position: absolute;
+    bottom: 26px; right: 26px;
+    z-index: 20;
+    background: rgba(3, 18, 23, 0.6);
+    border: 1px solid var(--sea-blue);
+    color: var(--sky-blue);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: all .3s ease;
+  }
+  .skip-btn:hover { background: var(--sea-blue); color: #fff; }
+
+  /* ================= 本編 ================= */
+  #page-content {
+    opacity: 0;
+    transition: opacity 1.5s ease;
+  }
+  #page-content.show { opacity: 1; }
+
+  main, header, footer { position: relative; z-index: 1; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- ヒーロー & ロゴ ---------- */
+  header.hero {
+    min-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 28px;
+    position: relative;
+  }
+
+  /* 演出終了後に表示されるロゴ画像 */
+  .logo-wrapper {
+    width: 100%;
+    max-width: 280px;
+    margin-bottom: 25px;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: opacity 1.2s ease 0.5s, transform 1.2s ease 0.5s;
+  }
+  #page-content.show .logo-wrapper {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .logo-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 12px rgba(112, 214, 235, 0.4));
+  }
+
+  h1.name {
+    font-family: 'Shippori Mincho B1', serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 8vw, 3.2rem);
+    letter-spacing: .12em;
+    margin: 0 0 10px;
+    color: #fff;
+    text-shadow: 0 0 20px var(--sea-blue);
+  }
+
+  .tagline {
+    color: var(--text-dim);
+    letter-spacing: .06em;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .hero-line {
+    width: 80px; height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(to right, transparent, var(--sky-blue), transparent);
+    margin-top: 35px;
+  }
+
+  /* ---------- セクション共通 ---------- */
+  section {
+    padding: 60px 0 20px;
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  section.in-view { opacity: 1; transform: translateY(0); }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 30px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head .mark {
+    font-size: .75rem;
+    letter-spacing: .1em;
+    color: var(--sky-blue);
+    flex-shrink: 0;
+  }
+  .section-head h2 {
+    font-size: 1.15rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    margin: 0;
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff, var(--sky-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ---------- 自己紹介 ---------- */
+  .intro-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 26px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .intro-card p {
+    margin: 0 0 16px;
+    font-size: 0.98rem;
+    word-break: break-word;
+  }
+  .intro-card p:last-child { margin-bottom: 0; }
+
+  .quote-box {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: rgba(0, 128, 148, 0.12);
+    border-left: 3px solid var(--sea-blue);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+    color: var(--sky-blue);
+  }
+
+  .notice-tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .tag {
+    font-size: 0.8rem;
+    background: var(--bg-panel-2);
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+
+  /* ---------- リンク一覧 ---------- */
+  .linklist {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .linkbtn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 22px;
+    font-size: 0.96rem;
+    letter-spacing: .04em;
+    position: relative;
+    overflow: hidden;
+    transition: all .3s ease;
+  }
+  .linkbtn::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(100deg, transparent, rgba(33, 178, 202, 0.15), transparent);
+    transform: translateX(-120%);
+    transition: transform .6s ease;
+  }
+  .linkbtn:hover {
+    border-color: var(--sky-blue);
+    background: var(--bg-panel-2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 128, 148, 0.3);
+  }
+  .linkbtn:hover::before { transform: translateX(120%); }
+  .linkbtn .arrow { color: var(--sky-blue); font-family: 'Shippori Mincho B1', serif; }
+
+  footer {
+    text-align: center;
+    padding: 60px 24px 40px;
+    color: var(--text-dim);
+    font-size: .78rem;
+    letter-spacing: .14em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    #intro-overlay { display: none; }
+    #page-content { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- オープニング演出 -->
+<div id="intro-overlay">
+  <div class="stage-viewport"></div>
+  <div class="ripple-container">
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+  </div>
+  <div class="sun-rays"></div>
+  
+  <div class="cutin-container">
+    <div class="flip-card" id="flipCard">ポンコツは直りません。</div>
+  </div>
+  
+  <button class="skip-btn" id="skipBtn">SKIP</button>
+</div>
+
+<!-- 本編内容 -->
+<div id="page-content">
+  <header class="hero wrap">
+    <!-- 添付ロゴ画像（演出終了後にふわっと表示） -->
+    <div class="logo-wrapper">
+      <img src="b7508985-515e-43ac-badc-01bc60901462.jpg" alt="Yuri Logo" class="logo-img">
+    </div>
+
+    <h1 class="name">ゆーり！</h1>
+    <p class="tagline">AI絵撲滅委員会執行員 / Illustrator</p>
+    <div class="hero-line"></div>
+  </header>
+
+  <main class="wrap">
+    <!-- 自己紹介セクション -->
+    <section class="intro">
+      <div class="section-head">
+        <span class="mark">01</span>
+        <h2>PROFILE</h2>
+      </div>
+      <div class="intro-card">
+        <p>イラストを描きますがAI絵が大嫌いです。</p>
+        <p>煽るなら煽られる覚悟はあるよね- ̗̀ ( ˶ᵔᵔ︎︎˶) ̖́-</p>
+        
+        <div class="quote-box">
+          「離せや帰るねん！」という名言を生み出したウォンナです。
+        </div>
+
+        <div class="notice-tags">
+          <span class="tag">🚫 AI学習NG</span>
+          <span class="tag">✉️ イラスト依頼受注紹介制</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- リンク集セクション -->
+    <section class="links">
+      <div class="section-head">
+        <span class="mark">02</span>
+        <h2>LINKS</h2>
+      </div>
+      <div class="linklist">
+        <a class="linkbtn" href="https://x.com/yuuuri_07fF" target="_blank" rel="noopener">
+          <span>X (Twitter)</span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="linkbtn" href="https://app.palmu.jp/users/6c9a7ba72a544c058502" target="_blank" rel="noopener">
+          <span>Palmu</span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="linkbtn" href="https://www.amazon.co.jp/hz/wishlist/ls/6OA6AZEVCGMR?ref_=wl_share" target="_blank" rel="noopener">
+          <span>欲しいものリスト</span>
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; ゆーり！ All Rights Reserved.</p>
+  </footer>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('intro-overlay');
+    const pageContent = document.getElementById('page-content');
+    const flipCard = document.getElementById('flipCard');
+    const skipBtn = document.getElementById('skipBtn');
+    const sections = document.querySelectorAll('section');
+
+    // テキストの切り替えタイミング（アニメーションの中盤で文字差し替え）
+    setTimeout(() => {
+      flipCard.textContent = "仕様だからです";
+    }, 4200);
+
+    // オープニング終了処理
+    const finishIntro = () => {
+      overlay.classList.add('hide');
+      pageContent.classList.add('show');
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        checkScroll();
+      }, 1200);
+    };
+
+    // 自動で本編へ遷移（全体の演出時間に合わせて調整）
+    const autoTimer = setTimeout(finishIntro, 6000);
+
+    // SKIPボタン
+    skipBtn.addEventListener('click', () => {
+      clearTimeout(autoTimer);
+      finishIntro();
+    });
+
+    // スクロール時のフェードイン
+    const checkScroll = () => {
+      const triggerBottom = window.innerHeight * 0.85;
+      sections.forEach(sec => {
+        const top = sec.getBoundingClientRect().top;
+        if (top < triggerBottom) {
+          sec.classList.add('in-view');
+        }
+      });
+    };
+
+    window.addEventListener('scroll', checkScroll);
+  });
+</script>
+</body>
+</html>

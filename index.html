@@ -6,7 +6,7 @@
 <title>ゆーり！ - Profile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #031217;
@@ -15,6 +15,7 @@
     --sky-blue: #70d6eb;
     --sea-blue: #008094;
     --sea-glow: #a4f0fd;
+    --logo-mint: #67c59a;
     --text: #e8f8fa;
     --text-dim: #8abac4;
     --line: rgba(0, 128, 148, 0.35);
@@ -36,7 +37,7 @@
     position: relative;
   }
 
-  /* ================= オープニング演出 (海辺→空→海中ダイブ→波紋＆光) ================= */
+  /* ================= オープニング演出 ================= */
   #intro-overlay {
     position: fixed;
     inset: 0;
@@ -50,39 +51,34 @@
   }
   #intro-overlay.hide { opacity: 0; pointer-events: none; }
 
-  /* 視点移動ステージ（海辺→空→着水・海中） */
   .stage-viewport {
     position: absolute;
     width: 100%;
     height: 300%;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     background: linear-gradient(
       to bottom,
-      #133742 0%,    /* 海辺・夕暮れ/空の下層 */
-      #03101d 25%,   /* 上空・宇宙に近い青 */
-      #023440 60%,   /* 水面・浅瀬 */
-      #00242c 80%,   /* 海中 */
+      #133742 0%,
+      #03101d 25%,
+      #023440 60%,
+      #00242c 80%,
       #000c12 100%
     );
     animation: cameraFly 4s cubic-bezier(0.45, 0, 0.15, 1) forwards;
   }
 
   @keyframes cameraFly {
-    0% { transform: translateY(-33.33%); }  /* 海辺スタート */
-    30% { transform: translateY(0%); }       /* 空へ大きく飛翔 */
-    65% { transform: translateY(-66.66%); }  /* 一気に海へダイブ */
-    100% { transform: translateY(-60%); }    /* 海中で静止 */
+    0% { transform: translateY(-33.33%); }
+    30% { transform: translateY(0%); }
+    65% { transform: translateY(-66.66%); }
+    100% { transform: translateY(-60%); }
   }
 
-  /* 水面着水時の水しぶき・波紋 */
   .ripple-container {
     position: absolute;
-    top: 60%;
-    left: 50%;
+    top: 60%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     pointer-events: none;
   }
 
@@ -97,10 +93,7 @@
     opacity: 0;
     animation: rippleBurst 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) 2.6s forwards;
   }
-
-  .ripple:nth-child(2) {
-    animation-delay: 2.8s;
-  }
+  .ripple:nth-child(2) { animation-delay: 2.8s; }
 
   @keyframes rippleBurst {
     0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
@@ -108,14 +101,11 @@
     100% { transform: translate(-50%, -50%) scale(30); opacity: 0; }
   }
 
-  /* 水中に差し込む光線 (Rays) */
   .sun-rays {
     position: absolute;
-    top: 30%;
-    left: 50%;
+    top: 30%; left: 50%;
     transform: translateX(-50%);
-    width: 200vw;
-    height: 100vh;
+    width: 200vw; height: 100vh;
     background: radial-gradient(ellipse at 50% 0%, rgba(164, 240, 253, 0.4) 0%, rgba(0, 128, 148, 0.15) 50%, transparent 80%);
     opacity: 0;
     mix-blend-mode: screen;
@@ -127,7 +117,6 @@
     100% { opacity: 0.9; transform: translateX(-50%) scaleY(1); }
   }
 
-  /* 90度フリップテキスト演出 */
   .cutin-container {
     position: relative;
     z-index: 10;
@@ -150,11 +139,11 @@
 
   @keyframes textSequence {
     0% { opacity: 0; transform: rotateX(-90deg); }
-    15% { opacity: 1; transform: rotateX(0deg); }      /* 「ポンコツは直りません」表示 */
+    15% { opacity: 1; transform: rotateX(0deg); }
     45% { opacity: 1; transform: rotateX(0deg); }
-    55% { transform: rotateX(90deg); opacity: 0; }     /* 90度ひっくり返る */
+    55% { transform: rotateX(90deg); opacity: 0; }
     65% { opacity: 0; transform: rotateX(-90deg); }
-    80% { opacity: 1; transform: rotateX(0deg); }      /* 「仕様だからです」切り替え */
+    80% { opacity: 1; transform: rotateX(0deg); }
     100% { opacity: 1; transform: rotateX(0deg); }
   }
 
@@ -186,7 +175,7 @@
   main, header, footer { position: relative; z-index: 1; }
   .wrap { max-width: 640px; margin: 0 auto; padding: 0 28px; }
 
-  /* ---------- ヒーロー & ロゴ ---------- */
+  /* ---------- ヒーロー & CSS/SVGロゴ ---------- */
   header.hero {
     min-height: 85vh;
     display: flex;
@@ -198,25 +187,25 @@
     position: relative;
   }
 
-  /* 演出終了後に表示されるロゴ画像 */
-  .logo-wrapper {
+  /* 純粋なCSS/SVGで描写したロゴ容器 */
+  .css-logo-wrapper {
     width: 100%;
-    max-width: 280px;
-    margin-bottom: 25px;
+    max-width: 320px;
+    margin-bottom: 20px;
     opacity: 0;
     transform: translateY(20px) scale(0.95);
     transition: opacity 1.2s ease 0.5s, transform 1.2s ease 0.5s;
+    filter: drop-shadow(0 0 10px rgba(103, 197, 154, 0.35));
   }
-  #page-content.show .logo-wrapper {
+  #page-content.show .css-logo-wrapper {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 
-  .logo-img {
+  .css-logo-svg {
     width: 100%;
     height: auto;
     display: block;
-    filter: drop-shadow(0 0 12px rgba(112, 214, 235, 0.4));
   }
 
   h1.name {
@@ -375,7 +364,7 @@
 </head>
 <body>
 
-<!-- オープニング演出 -->
+<!-- オープニング演出[cite: 2] -->
 <div id="intro-overlay">
   <div class="stage-viewport"></div>
   <div class="ripple-container">
@@ -391,12 +380,46 @@
   <button class="skip-btn" id="skipBtn">SKIP</button>
 </div>
 
-<!-- 本編内容 -->
+<!-- 本編内容[cite: 2] -->
 <div id="page-content">
   <header class="hero wrap">
-    <!-- 添付ロゴ画像（演出終了後にふわっと表示） -->
-    <div class="logo-wrapper">
-      <img src="b7508985-515e-43ac-badc-01bc60901462.jpg" alt="Yuri Logo" class="logo-img">
+    
+    <!-- 画像を使わず完全CSS/SVGで描画したロゴ -->
+    <div class="css-logo-wrapper">
+      <svg class="css-logo-svg" viewBox="0 0 450 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#67c59a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+          <!-- クローバー葉1 (上) -->
+          <path d="M 100 65 C 80 35, 120 35, 100 65 Z" fill="none" />
+          <!-- クローバー葉2 (右) -->
+          <path d="M 100 65 C 130 45, 130 85, 100 65 Z" fill="none" />
+          <!-- クローバー葉3 (下) -->
+          <path d="M 100 65 C 120 95, 80 95, 100 65 Z" fill="none" />
+          <!-- クローバー葉4 (左) -->
+          <path d="M 100 65 C 70 85, 70 45, 100 65 Z" fill="none" />
+          
+          <!-- クローバーの茎（左下に伸びる曲線） -->
+          <path d="M 100 65 Q 80 100, 105 125" fill="none" />
+          
+          <!-- キラキラ (左のクロス★) -->
+          <path d="M 68 105 L 68 117 M 62 111 L 74 111" stroke-width="2.5" />
+          <!-- ドット (左下の丸) -->
+          <circle cx="60" cy="122" r="1.8" fill="#67c59a" />
+          <circle cx="70" cy="132" r="2.2" fill="#67c59a" />
+
+          <!-- ハート (右上の小さいハート) -->
+          <path d="M 340 55 C 335 45, 325 50, 332 58 L 340 66 L 348 58 C 355 50, 345 45, 340 55 Z" stroke-width="2.8" />
+        </g>
+
+        <!-- Yuri 手書き文字テキスト (Caveatフォントをスクリプトスタイルで描写) -->
+        <text x="135" y="115" 
+              fill="none" 
+              stroke="#67c59a" 
+              stroke-width="2.5"
+              font-family="'Caveat', cursive" 
+              font-size="105" 
+              font-weight="600"
+              letter-spacing="1">Yuri</text>
+      </svg>
     </div>
 
     <h1 class="name">ゆーり！</h1>
@@ -405,7 +428,7 @@
   </header>
 
   <main class="wrap">
-    <!-- 自己紹介セクション -->
+    <!-- 自己紹介セクション[cite: 2] -->
     <section class="intro">
       <div class="section-head">
         <span class="mark">01</span>
@@ -426,7 +449,7 @@
       </div>
     </section>
 
-    <!-- リンク集セクション -->
+    <!-- リンク集セクション[cite: 2] -->
     <section class="links">
       <div class="section-head">
         <span class="mark">02</span>
@@ -462,12 +485,11 @@
     const skipBtn = document.getElementById('skipBtn');
     const sections = document.querySelectorAll('section');
 
-    // テキストの切り替えタイミング（アニメーションの中盤で文字差し替え）
+    // テキスト切り替え（ポンコツは直りません -> 仕様だからです）[cite: 2]
     setTimeout(() => {
       flipCard.textContent = "仕様だからです";
     }, 4200);
 
-    // オープニング終了処理
     const finishIntro = () => {
       overlay.classList.add('hide');
       pageContent.classList.add('show');
@@ -477,16 +499,13 @@
       }, 1200);
     };
 
-    // 自動で本編へ遷移（全体の演出時間に合わせて調整）
     const autoTimer = setTimeout(finishIntro, 6000);
 
-    // SKIPボタン
     skipBtn.addEventListener('click', () => {
       clearTimeout(autoTimer);
       finishIntro();
     });
 
-    // スクロール時のフェードイン
     const checkScroll = () => {
       const triggerBottom = window.innerHeight * 0.85;
       sections.forEach(sec => {
